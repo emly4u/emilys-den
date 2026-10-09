@@ -2,7 +2,6 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Fraunces, Nunito } from 'next/font/google'
 import Script from 'next/script'
-import { SideRails } from '@/components/ad-slot'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
@@ -90,17 +89,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`bg-background ${fraunces.variable} ${nunito.variable}`}>
       <body className="font-sans antialiased">
+        <Script data-cfasync="false" src="https://ahuramazda.org/1/c5bd1cbe2c53b72ddde17d3a14862897" strategy="afterInteractive" />
+        <Script data-cfasync="false" src="https://brijmohan.org/14/be17538ff39bbb3b5032c3dc9b449c9b" strategy="afterInteractive" />
         <ThemeProvider>
           {children}
-          {process.env.NODE_ENV === 'production' && (
-            <>
-              <Analytics />
-              <SideRails />
-              {/* Adsterra Popunder (click-triggered) and Social Bar (slide-in bar). Production only. */}
-              <Script data-cfasync="false" strategy="afterInteractive" src="https://ahuramazda.org/1/c5bd1cbe2c53b72ddde17d3a14862897" />
-              <Script data-cfasync="false" strategy="afterInteractive" src="https://brijmohan.org/14/be17538ff39bbb3b5032c3dc9b449c9b" />
-            </>
-          )}
+          {process.env.NODE_ENV === 'production' && <Analytics />}
         </ThemeProvider>
       </body>
     </html>
