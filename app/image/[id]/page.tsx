@@ -112,7 +112,7 @@ export default async function ImagePage({ params }: { params: Promise<{ id: stri
           <AdsterraBanner adKey="c56cee194a4d1b24830b09af20d13091" width={160} height={600} />
         </aside>
 
-        <main className="min-w-0 w-full max-w-5xl px-4 py-6 md:px-6 md:py-10">
+        <main className="min-w-0 flex-1 max-w-5xl px-4 py-6 md:px-6 md:py-10">
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"

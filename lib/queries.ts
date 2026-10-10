@@ -42,6 +42,15 @@ export async function getImages(
   return { images: hasMore ? rows.slice(0, limit) : rows, hasMore }
 }
 
+export async function getRandomHeroImage(): Promise<{ blobUrl: string | null } | undefined> {
+  const rows = await db
+    .select({ blobUrl: images.blobUrl })
+    .from(images)
+    .orderBy(sql`RANDOM()`)
+    .limit(1)
+  return rows[0]
+}
+
 export async function getSitemapImages(): Promise<{ id: number; driveFileId: string; createdAt: Date }[]> {
   return db
     .select({ id: images.id, driveFileId: images.driveFileId, createdAt: images.createdAt })

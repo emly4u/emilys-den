@@ -5,8 +5,7 @@ import { SiteHeader } from "@/components/site-header"
 import { GalleryGrid } from "@/components/gallery-grid"
 import { SortToggle } from "@/components/sort-toggle"
 import { AdsterraBanner } from "@/components/adsterra-banner"
-import { AdsterraNative } from "@/components/adsterra-native"
-import { getImages, type ImageSort } from "@/lib/queries"
+import { getImages, getRandomHeroImage, type ImageSort } from "@/lib/queries"
 import { maybeSync } from "@/lib/sync"
 
 export const dynamic = "force-dynamic"
@@ -14,8 +13,10 @@ export const dynamic = "force-dynamic"
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {
   const { sort: sortParam } = await searchParams
   const sort: ImageSort = sortParam === "popular" ? "popular" : "new"
-  const { images, hasMore } = await getImages(sort)
-  const heroImage = images.length > 0 ? images[Math.floor(Math.random() * images.length)] : null
+  const [{ images, hasMore }, heroImage] = await Promise.all([
+    getImages(sort),
+    getRandomHeroImage(),
+  ])
 
   after(async () => {
     try {
@@ -34,7 +35,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <AdsterraBanner adKey="c56cee194a4d1b24830b09af20d13091" width={160} height={600} />
         </aside>
 
-        <main className="min-w-0 w-full max-w-7xl pb-16 pt-8 md:pb-24 md:pt-14">
+        <main className="min-w-0 flex-1 max-w-7xl pb-16 pt-8 md:pb-24 md:pt-14">
           <section className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-card px-6 py-10 shadow-sm md:px-12 md:py-16">
             {heroImage?.blobUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -65,17 +66,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           </section>
 
-          <div className="mt-6 flex flex-col items-center gap-4">
+          <div className="mt-6 flex justify-center">
             <div className="hidden md:block">
               <AdsterraBanner adKey="5886a3f0b13b2c7376c81f54cbb661a2" width={728} height={90} />
             </div>
             <div className="block md:hidden">
               <AdsterraBanner adKey="57d230052a69423ff827502434658d5f" width={320} height={50} />
-            </div>
-            <AdsterraNative />
-            <AdsterraBanner adKey="a8ed7b64e96d0837a4df314ce4fe16da" width={300} height={250} />
-            <div className="hidden md:block">
-              <AdsterraBanner adKey="b31adbd3f6d6aae627a673e5f40c03d8" width={468} height={60} />
             </div>
           </div>
 
