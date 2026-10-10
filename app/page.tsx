@@ -29,79 +29,85 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-7xl px-4 pb-16 pt-8 md:px-8 md:pb-24 md:pt-14">
-        <section className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-card px-6 py-10 shadow-sm md:px-12 md:py-16">
-          {heroImage?.blobUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={heroImage.blobUrl}
-              alt=""
-              aria-hidden="true"
-              referrerPolicy="no-referrer"
-              className="pointer-events-none absolute inset-y-0 right-0 h-full w-full object-cover object-top opacity-30 [mask-image:linear-gradient(to_right,transparent_0%,black_70%)] md:w-3/5 md:opacity-100 md:[mask-image:linear-gradient(to_right,transparent_0%,black_55%)]"
-            />
-          ) : (
-            <div className="pointer-events-none absolute right-0 top-0 size-48 rounded-bl-full bg-accent/30" aria-hidden="true" />
-          )}
-          <div className="relative max-w-3xl">
-            <p className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary">
-              <Sparkles className="size-4" aria-hidden="true" /> A living archive
-            </p>
-            <h1 className="max-w-2xl text-balance font-serif text-5xl font-semibold leading-[0.98] tracking-[-0.04em] md:text-7xl">
-              A den for images worth keeping.
-            </h1>
-            <p className="mt-7 max-w-xl text-pretty text-base leading-7 text-muted-foreground md:text-lg">
-              Emily&apos;s Den is a growing collection of images, kept together in one place and added to as new ones arrive.
-            </p>
-          </div>
-          <div className="relative mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border/70 pt-5 text-sm text-muted-foreground">
-            <span className="flex items-center gap-2"><Images className="size-4 text-primary" aria-hidden="true" /> {images.length}{hasMore ? "+" : ""} images in view</span>
-            <span>Updated as new finds arrive</span>
-          </div>
-        </section>
+      <div className="flex items-start justify-center gap-4 px-2 md:px-4">
+        <aside className="hidden xl:flex flex-col gap-4 pt-14 sticky top-4 self-start shrink-0">
+          <AdsterraBanner adKey="c56cee194a4d1b24830b09af20d13091" width={160} height={600} />
+        </aside>
 
-        <div className="mt-6 flex flex-col items-center gap-4">
-          <div className="hidden md:block">
-            <AdsterraBanner adKey="5886a3f0b13b2c7376c81f54cbb661a2" width={728} height={90} />
-          </div>
-          <div className="block md:hidden">
-            <AdsterraBanner adKey="57d230052a69423ff827502434658d5f" width={320} height={50} />
-          </div>
-          <AdsterraNative />
-          <AdsterraBanner adKey="a8ed7b64e96d0837a4df314ce4fe16da" width={300} height={250} />
-          <div className="hidden md:block">
-            <AdsterraBanner adKey="b31adbd3f6d6aae627a673e5f40c03d8" width={468} height={60} />
-          </div>
-          <div className="hidden lg:flex gap-4">
-            <AdsterraBanner adKey="6dc2c7111cf540e9cc06fa69bda599e4" width={160} height={300} />
-            <AdsterraBanner adKey="c56cee194a4d1b24830b09af20d13091" width={160} height={600} />
-          </div>
-        </div>
-
-        <section className="mt-12" aria-labelledby="collection-heading">
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">The collection</p>
-              <h2 id="collection-heading" className="mt-2 font-serif text-3xl font-semibold tracking-tight md:text-4xl">Recent discoveries</h2>
-            </div>
-            {images.length > 0 && (
-              <div className="flex flex-wrap items-center gap-3">
-                <SortToggle current={sort} />
-              </div>
+        <main className="min-w-0 w-full max-w-7xl pb-16 pt-8 md:pb-24 md:pt-14">
+          <section className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-card px-6 py-10 shadow-sm md:px-12 md:py-16">
+            {heroImage?.blobUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={heroImage.blobUrl}
+                alt=""
+                aria-hidden="true"
+                referrerPolicy="no-referrer"
+                className="pointer-events-none absolute inset-y-0 right-0 h-full w-full object-cover object-top opacity-30 [mask-image:linear-gradient(to_right,transparent_0%,black_70%)] md:w-3/5 md:opacity-100 md:[mask-image:linear-gradient(to_right,transparent_0%,black_55%)]"
+              />
+            ) : (
+              <div className="pointer-events-none absolute right-0 top-0 size-48 rounded-bl-full bg-accent/30" aria-hidden="true" />
             )}
+            <div className="relative max-w-3xl">
+              <p className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary">
+                <Sparkles className="size-4" aria-hidden="true" /> A living archive
+              </p>
+              <h1 className="max-w-2xl text-balance font-serif text-5xl font-semibold leading-[0.98] tracking-[-0.04em] md:text-7xl">
+                A den for images worth keeping.
+              </h1>
+              <p className="mt-7 max-w-xl text-pretty text-base leading-7 text-muted-foreground md:text-lg">
+                Emily&apos;s Den is a growing collection of images, kept together in one place and added to as new ones arrive.
+              </p>
+            </div>
+            <div className="relative mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border/70 pt-5 text-sm text-muted-foreground">
+              <span className="flex items-center gap-2"><Images className="size-4 text-primary" aria-hidden="true" /> {images.length}{hasMore ? "+" : ""} images in view</span>
+              <span>Updated as new finds arrive</span>
+            </div>
+          </section>
+
+          <div className="mt-6 flex flex-col items-center gap-4">
+            <div className="hidden md:block">
+              <AdsterraBanner adKey="5886a3f0b13b2c7376c81f54cbb661a2" width={728} height={90} />
+            </div>
+            <div className="block md:hidden">
+              <AdsterraBanner adKey="57d230052a69423ff827502434658d5f" width={320} height={50} />
+            </div>
+            <AdsterraNative />
+            <AdsterraBanner adKey="a8ed7b64e96d0837a4df314ce4fe16da" width={300} height={250} />
+            <div className="hidden md:block">
+              <AdsterraBanner adKey="b31adbd3f6d6aae627a673e5f40c03d8" width={468} height={60} />
+            </div>
           </div>
 
-          {images.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-24 text-center">
-              <span className="mb-5 flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground"><ImageOff className="size-7" aria-hidden="true" /></span>
-              <h2 className="font-serif text-2xl font-medium">The den is still quiet</h2>
-              <p className="mt-3 max-w-sm text-pretty leading-6 text-muted-foreground">New images from the Drive folder will appear here after the first sync. Use “Sync now” to check for them.</p>
+          <section className="mt-12" aria-labelledby="collection-heading">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">The collection</p>
+                <h2 id="collection-heading" className="mt-2 font-serif text-3xl font-semibold tracking-tight md:text-4xl">Recent discoveries</h2>
+              </div>
+              {images.length > 0 && (
+                <div className="flex flex-wrap items-center gap-3">
+                  <SortToggle current={sort} />
+                </div>
+              )}
             </div>
-          ) : (
-            <GalleryGrid initialImages={images} initialHasMore={hasMore} sort={sort} />
-          )}
-        </section>
-      </main>
+
+            {images.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-24 text-center">
+                <span className="mb-5 flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground"><ImageOff className="size-7" aria-hidden="true" /></span>
+                <h2 className="font-serif text-2xl font-medium">The den is still quiet</h2>
+                <p className="mt-3 max-w-sm text-pretty leading-6 text-muted-foreground">New images from the Drive folder will appear here after the first sync. Use "Sync now" to check for them.</p>
+              </div>
+            ) : (
+              <GalleryGrid initialImages={images} initialHasMore={hasMore} sort={sort} />
+            )}
+          </section>
+        </main>
+
+        <aside className="hidden xl:flex flex-col gap-4 pt-14 sticky top-4 self-start shrink-0">
+          <AdsterraBanner adKey="6dc2c7111cf540e9cc06fa69bda599e4" width={160} height={300} />
+        </aside>
+      </div>
     </div>
   )
 }
