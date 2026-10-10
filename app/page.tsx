@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header"
 import { GalleryGrid } from "@/components/gallery-grid"
 import { SortToggle } from "@/components/sort-toggle"
 import { AdsterraBanner } from "@/components/adsterra-banner"
+import { AdsterraNative } from "@/components/adsterra-native"
 import { getImages, getRandomHeroImage, type ImageSort } from "@/lib/queries"
 import { maybeSync } from "@/lib/sync"
 
@@ -66,7 +67,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           </section>
 
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <AdsterraNative />
             <div className="hidden md:block">
               <AdsterraBanner adKey="5886a3f0b13b2c7376c81f54cbb661a2" width={728} height={90} />
             </div>
