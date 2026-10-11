@@ -5,7 +5,7 @@ import type { ImageRow } from "./db/schema"
 
 export type ImageWithCount = ImageRow & { commentCount: number }
 
-export type ImageSort = "new" | "popular"
+export type ImageSort = "new" | "popular" | "random"
 
 export const IMAGES_PAGE_SIZE = 48
 

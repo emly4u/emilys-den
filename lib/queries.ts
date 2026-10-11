@@ -17,7 +17,9 @@ export async function getImages(
   const orderBy =
     sort === "popular"
       ? [desc(images.views), desc(images.createdAt)]
-      : [desc(images.createdAt)]
+      : sort === "random"
+        ? [sql`RANDOM()`]
+        : [desc(images.createdAt)]
 
   // Fetch one extra row to detect whether another page exists.
   const rows = await db
