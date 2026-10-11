@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic"
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {
   const { sort: sortParam } = await searchParams
-  const sort: ImageSort = sortParam === "popular" ? "popular" : "new"
+  const sort: ImageSort = sortParam === "popular" || sortParam === "new" ? sortParam : "random"
   const [{ images, hasMore }, heroImage] = await Promise.all([
     getImages(sort),
     getRandomHeroImage(),

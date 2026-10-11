@@ -1,10 +1,37 @@
 "use server"
 
+import { createHash, randomUUID } from "node:crypto"
 import { revalidatePath } from "next/cache"
-import { eq, sql } from "drizzle-orm"
+import { cookies, headers } from "next/headers"
+import { and, eq, sql } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { comments, images } from "@/lib/db/schema"
+import { comments, imageReactions, images } from "@/lib/db/schema"
 import { getImages, type ImageSort, type ImagesPage } from "@/lib/queries"
+
+export async function reactToImage(imageId: number, direction: "like" | "dislike") {
+  const requestHeaders = await headers()
+  const requestCookies = await cookies()
+  let visitorId = requestCookies.get("den_visitor")?.value
+  if (!visitorId) {
+    visitorId = randomUUID()
+    requestCookies.set("den_visitor", visitorId, { httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 365 })
+  }
+  const fingerprint = createHash("sha256")
+    .update(`${visitorId}:${requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"}`)
+    .digest("hex")
+
+  const existing = await db.query.imageReactions.findFirst({ where: and(eq(imageReactions.imageId, imageId), eq(imageReactions.fingerprint, fingerprint)) })
+  if (existing?.direction === direction) {
+    await db.delete(imageReactions).where(eq(imageReactions.id, existing.id))
+  } else if (existing) {
+    await db.update(imageReactions).set({ direction }).where(eq(imageReactions.id, existing.id))
+  } else {
+    await db.insert(imageReactions).values({ imageId, fingerprint, direction })
+  }
+
+  const counts = await db.select({ direction: imageReactions.direction, count: sql<number>`count(*)` }).from(imageReactions).where(eq(imageReactions.imageId, imageId)).groupBy(imageReactions.direction)
+  return { like: Number(counts.find((count) => count.direction === "like")?.count ?? 0), dislike: Number(counts.find((count) => count.direction === "dislike")?.count ?? 0), active: existing?.direction === direction ? null : direction }
+}
 
 export async function incrementView(imageId: number) {
   await db

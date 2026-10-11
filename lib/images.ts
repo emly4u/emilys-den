@@ -3,9 +3,9 @@ import type { ImageRow } from "./db/schema"
 // Shared image types/constants with NO database imports, so they are safe to
 // import from client components (unlike lib/queries.ts, which pulls in `pg`).
 
-export type ImageWithCount = ImageRow & { commentCount: number }
+export type ImageWithCount = ImageRow & { commentCount: number; likeCount: number; dislikeCount: number }
 
-export type ImageSort = "new" | "popular"
+export type ImageSort = "new" | "popular" | "random"
 
 export const IMAGES_PAGE_SIZE = 48
 

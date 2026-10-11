@@ -12,6 +12,14 @@ export const images = pgTable("images", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 })
 
+export const imageReactions = pgTable("image_reactions", {
+  id: serial("id").primaryKey(),
+  imageId: integer("image_id").notNull(),
+  fingerprint: text("fingerprint").notNull(),
+  direction: text("direction").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+})
+
 export const comments = pgTable("comments", {
   id: serial("id").primaryKey(),
   imageId: integer("image_id").notNull(),

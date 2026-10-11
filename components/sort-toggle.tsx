@@ -2,10 +2,11 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTransition } from "react"
-import { Clock, Flame } from "lucide-react"
+import { Clock, Flame, Shuffle } from "lucide-react"
 import type { ImageSort } from "@/lib/images"
 
 const OPTIONS: { value: ImageSort; label: string; icon: typeof Clock }[] = [
+  { value: "random", label: "Random", icon: Shuffle },
   { value: "new", label: "New", icon: Clock },
   { value: "popular", label: "Popular", icon: Flame },
 ]
@@ -18,8 +19,7 @@ export function SortToggle({ current }: { current: ImageSort }) {
   function select(value: ImageSort) {
     if (value === current) return
     const params = new URLSearchParams(searchParams.toString())
-    if (value === "new") params.delete("sort")
-    else params.set("sort", value)
+    params.set("sort", value)
     const query = params.toString()
     startTransition(() => {
       router.push(query ? `/?${query}` : "/", { scroll: false })
