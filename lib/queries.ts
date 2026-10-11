@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { desc, eq, sql } from "drizzle-orm"
 import { db } from "./db"
-import { comments, images } from "./db/schema"
+import { comments, imageReactions, images } from "./db/schema"
 import type { CommentRow, ImageRow } from "./db/schema"
 import { IMAGES_PAGE_SIZE } from "./images"
 import type { ImageSort, ImagesPage, ImageWithCount } from "./images"
@@ -32,6 +32,8 @@ export async function getImages(
       views: images.views,
       createdAt: images.createdAt,
       commentCount: sql<number>`count(${comments.id})::int`,
+      likeCount: sql<number>`(select count(*)::int from ${imageReactions} where ${imageReactions.imageId} = ${images.id} and ${imageReactions.direction} = 'like')`,
+      dislikeCount: sql<number>`(select count(*)::int from ${imageReactions} where ${imageReactions.imageId} = ${images.id} and ${imageReactions.direction} = 'dislike')`,
     })
     .from(images)
     .leftJoin(comments, eq(comments.imageId, images.id))

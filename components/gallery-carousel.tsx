@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useState } from "react"
 import { ChevronLeft, ChevronRight, Heart, ThumbsDown, X } from "lucide-react"
-import { voteImage } from "@/app/actions/gallery"
+import { reactToImage } from "@/app/actions/gallery"
 import type { ImageWithCount } from "@/lib/images"
 
 export function GalleryCarousel({ images, onClose }: { images: ImageWithCount[]; onClose: () => void }) {
@@ -17,7 +17,7 @@ export function GalleryCarousel({ images, onClose }: { images: ImageWithCount[];
 
   async function vote(vote: "like" | "dislike") {
     setVotes((current) => ({ ...current, [image.id]: vote }))
-    await voteImage(image.id, vote)
+    await reactToImage(image.id, vote)
   }
 
   return (
