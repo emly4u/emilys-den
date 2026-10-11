@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowUpRight, Eye, Loader2, MessageCircle } from "lucide-react"
+import { ArrowLeft, ArrowRight, ArrowUpRight, Eye, Images, Loader2, MessageCircle, X } from "lucide-react"
 import { MotionImage } from "@/components/animation-toggle"
 import { loadMoreImages } from "@/app/actions/gallery"
 import { IMAGES_PAGE_SIZE, type ImageSort, type ImageWithCount } from "@/lib/images"
