@@ -29,7 +29,7 @@ function resetCardTilt(event: ReactPointerEvent<HTMLElement>) {
   event.currentTarget.style.removeProperty("transform")
 }
 
-export function GalleryGrid({ initialImages, initialHasMore, sort }: { initialImages: ImageWithCount[]; initialHasMore: boolean; sort: ImageSort }) {
+export function GalleryGrid({ initialImages, initialHasMore, preloadUrls, sort }: { initialImages: ImageWithCount[]; initialHasMore: boolean; preloadUrls: string[]; sort: ImageSort }) {
   const [images, setImages] = useState(initialImages)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [loading, setLoading] = useState(false)
@@ -55,13 +55,15 @@ export function GalleryGrid({ initialImages, initialHasMore, sort }: { initialIm
     async function preloadAll() {
       if (!("caches" in window)) return
       const cache = await caches.open("emilys-den-images-v1")
-      const urls = images.map((image) => image.blobUrl).filter(Boolean) as string[]
       let count = 0
-      for (const url of urls) {
+      setCachedCount(0)
+      for (const url of preloadUrls) {
         if (cancelled) return
         if (!preloadedUrls.current.has(url)) {
-          preloadedUrls.current.add(url)
-          try { if (!(await cache.match(url))) await cache.add(url) } catch { /* a single unavailable image should not stop the queue */ }
+          try {
+            if (!(await cache.match(url))) await cache.add(url)
+            preloadedUrls.current.add(url)
+          } catch { continue }
         }
         count += 1
         setCachedCount(count)
@@ -69,7 +71,7 @@ export function GalleryGrid({ initialImages, initialHasMore, sort }: { initialIm
     }
     preloadAll()
     return () => { cancelled = true }
-  }, [images])
+  }, [preloadUrls])
 
   async function react(imageId: number, direction: "like" | "dislike") {
     if (pendingReaction === imageId) return
@@ -90,7 +92,7 @@ export function GalleryGrid({ initialImages, initialHasMore, sort }: { initialIm
   function move(delta: number) { setActiveIndex((index) => (index + delta + images.length) % images.length) }
 
   return <>
-    {cachedCount > 0 && <div className="fixed bottom-6 right-6 z-40 flex max-w-[calc(100vw-3rem)] items-center gap-4 rounded-3xl border border-primary/40 bg-card/85 p-3 pr-5 text-sm text-foreground/80 opacity-45 shadow-2xl shadow-background/50 backdrop-blur-xl transition-all duration-300 hover:border-primary/70 hover:bg-card/95 hover:opacity-100 hover:shadow-primary/15"><span className="relative flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary/20 shadow-lg"><img src="/img/background.gif" alt="" aria-hidden="true" className="size-full object-cover" /></span><span><strong className="block text-foreground">Preloading the den</strong><span>{cachedCount} images stored in cache</span></span><Check className="ml-auto shrink-0 text-primary" aria-hidden="true" /></div>}
+    {cachedCount > 0 && <div className="fixed bottom-6 right-6 z-40 flex max-w-[calc(100vw-3rem)] items-center gap-4 rounded-3xl border border-primary/40 bg-card/85 p-3 pr-5 text-sm text-foreground/80 opacity-45 shadow-2xl shadow-background/50 backdrop-blur-xl transition-all duration-300 hover:border-primary/70 hover:bg-card/95 hover:opacity-100 hover:shadow-primary/15"><span className="relative flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary/20 shadow-lg"><img src="/img/background.gif" alt="" aria-hidden="true" className="size-full object-cover" /></span><span><strong className="block text-foreground">Preloading the den</strong><span><span key={cachedCount} className="cache-counter">{cachedCount}</span> of {preloadUrls.length} images stored in cache</span></span><Check className="ml-auto shrink-0 text-primary" aria-hidden="true" /></div>}
     <div className="mb-6 flex justify-end"><button type="button" onClick={() => { setActiveIndex(0); setGalleryOpen(true) }} className={buttonVariants({ variant: "outline", className: "gap-2 border-border/80 bg-card/80 px-4 py-2.5 shadow-sm hover:border-primary/70 hover:bg-primary/10" })}><Images aria-hidden="true" /> Gallery mode</button></div>
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {images.map((image, index) => <article key={image.id} data-gallery-card onPointerMove={tiltCard} onPointerLeave={resetCardTilt} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-md transition-[transform,box-shadow,border-color] duration-200 ease-out [transform-style:preserve-3d] will-change-transform hover:z-10 hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/25">
