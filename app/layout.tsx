@@ -39,6 +39,20 @@ export const metadata: Metadata = {
     'AI wife',
   ],
   generator: 'v0.app',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     type: 'website',
     url: 'https://emly4u.vercel.app',
@@ -74,11 +88,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f4efe8' },
-    { media: '(prefers-color-scheme: dark)', color: '#1c1714' },
-  ],
+  colorScheme: 'dark',
+  themeColor: '#1c1714',
 }
 
 export default function RootLayout({
