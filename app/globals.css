@@ -48,13 +48,13 @@
 }
 
 :root {
-  color-scheme: dark;
-  --background: oklch(0.12 0.018 48);
-  --foreground: oklch(0.93 0.018 75);
-  --card: oklch(0.17 0.022 48);
-  --card-foreground: oklch(0.93 0.018 75);
-  --popover: oklch(0.17 0.022 48);
-  --popover-foreground: oklch(0.93 0.018 75);
+  color-scheme: light;
+  --background: oklch(0.965 0.012 72);
+  --foreground: oklch(0.22 0.025 45);
+  --card: oklch(0.99 0.008 72);
+  --card-foreground: oklch(0.22 0.025 45);
+  --popover: oklch(0.99 0.008 72);
+  --popover-foreground: oklch(0.22 0.025 45);
   --primary: oklch(0.53 0.12 38);
   --primary-foreground: oklch(0.98 0.01 80);
   --secondary: oklch(0.91 0.025 70);
@@ -126,4 +126,10 @@
 
 @layer utilities {
   .gallery-grain { background-image: radial-gradient(color-mix(in oklch, var(--foreground) 9%, transparent) 0.7px, transparent 0.7px); background-size: 14px 14px; }
+  .cache-counter { display: inline-block; min-width: 2ch; font-variant-numeric: tabular-nums; animation: cache-counter-pop 180ms ease-out; }
+}
+
+@keyframes cache-counter-pop {
+  0% { opacity: 0.35; transform: translateY(0.3em) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
