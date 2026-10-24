@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { getSitemapImages } from '@/lib/queries'
+import { getPublicImageUrl } from '@/lib/images'
 
 const baseUrl = 'https://emly4u.vercel.app'
 
@@ -26,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: image.createdAt,
         changeFrequency: 'weekly',
         priority: 0.7,
-        images: [`https://drive.google.com/thumbnail?id=${encodeURIComponent(image.driveFileId)}&sz=w1600`],
+        images: [`${baseUrl}${getPublicImageUrl(image.id)}`],
       })
     }
   } catch (error) {

@@ -16,10 +16,11 @@ export async function getImages(
 ): Promise<ImagesPage> {
   const orderBy =
     sort === "popular"
-      ? [desc(images.views), desc(images.createdAt)]
+      ? [desc(images.views), desc(images.createdAt), desc(images.id)]
       : sort === "random"
-        ? [sql`RANDOM()`]
-        : [desc(images.createdAt)]
+        // A stable shuffle prevents overlapping or missing images across pages.
+        ? [sql`md5(${images.id}::text)`, desc(images.id)]
+        : [desc(images.createdAt), desc(images.id)]
 
   // Fetch one extra row to detect whether another page exists.
   try {

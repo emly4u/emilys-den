@@ -20,6 +20,7 @@ export function SortToggle({ current }: { current: ImageSort }) {
     if (value === current) return
     const params = new URLSearchParams(searchParams.toString())
     params.set("sort", value)
+    params.delete("page")
     const query = params.toString()
     startTransition(() => {
       router.push(query ? `/?${query}` : "/", { scroll: false })

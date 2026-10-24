@@ -9,13 +9,13 @@ import { CopyLink } from "@/components/copy-link"
 import { CommentSection } from "@/components/comment-section"
 import { ImageActions } from "@/components/image-actions"
 import { ImageContextMenu } from "@/components/image-context-menu"
-import { CachedDriveImage } from "@/components/cached-drive-image"
 import { ImageMotionButton, MotionImage } from "@/components/animation-toggle"
 import { WindCanvas } from "@/components/wind-image"
 import { AdsterraBanner } from "@/components/adsterra-banner"
 import { buttonVariants } from "@/components/ui/button"
 import { incrementView } from "@/app/actions/gallery"
 import { getComments, getImage } from "@/lib/queries"
+import { getPublicImageUrl } from "@/lib/images"
 
 export const dynamic = "force-dynamic"
 
@@ -54,9 +54,7 @@ export async function generateMetadata({
   const title = `${image.name} — Emily's Den`
   const description = `${image.name} · #emly4u #Emily Kate #just_emly4u · ${X_URL}`
   const url = `https://emly4u.vercel.app/image/${imageId}`
-  // Use Google's public thumbnail as the crawlable preview. The database only
-  // stores a lightweight thumbnail reference, while the original stays in Drive.
-  const previewImage = `https://drive.google.com/thumbnail?id=${encodeURIComponent(image.driveFileId)}&sz=w1600`
+  const previewImage = `https://emly4u.vercel.app${getPublicImageUrl(image.id)}`
 
   return {
     title,
@@ -93,7 +91,7 @@ export default async function ImagePage({ params }: { params: Promise<{ id: stri
   const image = await getImage(imageId)
   if (!image) notFound()
 
-  const thumbnailUrl = `https://drive.google.com/thumbnail?id=${encodeURIComponent(image.driveFileId)}&sz=w1600`
+  const thumbnailUrl = getPublicImageUrl(image.id)
 
   // Count this open as a view, after the response is sent so it never blocks render.
   after(async () => {
@@ -137,10 +135,12 @@ export default async function ImagePage({ params }: { params: Promise<{ id: stri
                 >
                   <MotionImage>
                     <div className="relative">
-                      <CachedDriveImage
-                        fileId={image.driveFileId}
-                        thumbnailUrl={thumbnailUrl}
+                      <img
+                        src={thumbnailUrl}
                         alt={image.name}
+                        loading="eager"
+                        decoding="async"
+                        fetchPriority="high"
                         className="max-h-[70vh] w-full object-contain transition-opacity group-hover:opacity-90"
                       />
                       <WindCanvas imageId={imageId} />

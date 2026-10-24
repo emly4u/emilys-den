@@ -1,4 +1,6 @@
 import { ImageOff, Images, Sparkles } from "lucide-react"
+import type { Metadata } from "next"
+import Link from "next/link"
 import { after } from "next/server"
 import { revalidatePath } from "next/cache"
 import { SiteHeader } from "@/components/site-header"
@@ -6,18 +8,32 @@ import { GalleryGrid } from "@/components/gallery-grid"
 import { SortToggle } from "@/components/sort-toggle"
 import { AdsterraBanner } from "@/components/adsterra-banner"
 import { AdsterraNative } from "@/components/adsterra-native"
-import { getImages, getRandomHeroImage, type ImageSort } from "@/lib/queries"
+import { getImages, type ImageSort } from "@/lib/queries"
+import { getGalleryHref, getGalleryPage, getPublicImageUrl, IMAGES_PAGE_SIZE } from "@/lib/images"
 import { maybeSync } from "@/lib/sync"
 
 export const dynamic = "force-dynamic"
 
-export default async function HomePage({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {
-  const { sort: sortParam } = await searchParams
-  const sort: ImageSort = sortParam === "popular" || sortParam === "new" ? sortParam : "random"
-  const [{ images, hasMore }, heroImage] = await Promise.all([
-    getImages(sort),
-    getRandomHeroImage(),
-  ])
+type HomePageProps = { searchParams: Promise<{ sort?: string; page?: string }> }
+
+export async function generateMetadata({ searchParams }: HomePageProps): Promise<Metadata> {
+  const params = await searchParams
+  const page = getGalleryPage(params.page)
+  const sort = params.sort === "popular" || params.sort === "random" ? params.sort : "new"
+  return {
+    title: `Emily's Den — AI art gallery${page > 1 ? ` · Page ${page}` : ""}`,
+    description: "Browse Emily's AI-generated art in a public image gallery. Explore the latest images and open each artwork to view it in full.",
+    alternates: { canonical: getGalleryHref(page, sort) },
+  }
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const { sort: sortParam, page: pageParam } = await searchParams
+  const sort: ImageSort = sortParam === "popular" || sortParam === "random" ? sortParam : "new"
+  const page = getGalleryPage(pageParam)
+  const offset = (page - 1) * IMAGES_PAGE_SIZE
+  const { images, hasMore } = await getImages(sort, { offset })
+  const heroImage = images[0]
 
   after(async () => {
     try {
@@ -37,11 +53,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </aside>
 
         <main className="min-w-0 flex-1 max-w-7xl pb-16 pt-8 md:pb-24 md:pt-14">
-          <section className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-card px-6 py-10 shadow-sm md:px-12 md:py-16">
-            {heroImage?.blobUrl ? (
+          <section className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-card px-6 py-6 shadow-sm md:px-8 md:py-8">
+            {heroImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={heroImage.blobUrl}
+                src={getPublicImageUrl(heroImage.id)}
                 alt=""
                 aria-hidden="true"
                 referrerPolicy="no-referrer"
@@ -54,11 +70,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <p className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary">
                 <Sparkles className="size-4" aria-hidden="true" /> A living archive
               </p>
-              <h1 className="max-w-2xl text-balance font-serif text-5xl font-semibold leading-[0.98] tracking-[-0.04em] md:text-7xl">
-                A den for images worth keeping.
+              <h1 className="max-w-2xl text-balance font-serif text-4xl font-semibold leading-tight tracking-[-0.04em] md:text-5xl">
+                Emily&apos;s AI art gallery
               </h1>
               <p className="mt-7 max-w-xl text-pretty text-base leading-7 text-muted-foreground md:text-lg">
-                Emily&apos;s Den is a growing collection of images, kept together in one place and added to as new ones arrive.
+                Explore the latest AI-generated artwork. Browse the image feed below and open any image for a closer look.
               </p>
             </div>
             <div className="relative mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border/70 pt-5 text-sm text-muted-foreground">
@@ -67,21 +83,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           </section>
 
-          <div className="mt-6 flex flex-col items-center gap-2">
-            <AdsterraNative />
-            <div className="hidden md:block">
-              <AdsterraBanner adKey="5886a3f0b13b2c7376c81f54cbb661a2" width={728} height={90} />
-            </div>
-            <div className="block md:hidden">
-              <AdsterraBanner adKey="57d230052a69423ff827502434658d5f" width={320} height={50} />
-            </div>
-          </div>
-
           <section className="mt-12" aria-labelledby="collection-heading">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">The collection</p>
-                <h2 id="collection-heading" className="mt-2 font-serif text-3xl font-semibold tracking-tight md:text-4xl">Recent discoveries</h2>
+                <h2 id="collection-heading" className="mt-2 font-serif text-3xl font-semibold tracking-tight md:text-4xl">{sort === "popular" ? "Popular artwork" : sort === "random" ? "Explore the collection" : "Latest artwork"}</h2>
               </div>
               {images.length > 0 && (
                 <div className="flex flex-wrap items-center gap-3">
@@ -97,9 +103,24 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 <p className="mt-3 max-w-sm text-pretty leading-6 text-muted-foreground">New images from the Drive folder will appear here after the first sync. Use "Sync now" to check for them.</p>
               </div>
             ) : (
-              <GalleryGrid initialImages={images} initialHasMore={hasMore} sort={sort} />
+              <GalleryGrid key={`${sort}-${page}`} initialImages={images} initialHasMore={hasMore} initialOffset={offset} sort={sort} />
             )}
+            <nav aria-label="Gallery pages" className="mt-8 flex items-center justify-center gap-6 text-sm font-semibold">
+              {page > 1 && <Link href={getGalleryHref(page - 1, sort)} prefetch={false} rel="prev" className="underline underline-offset-4">Previous page</Link>}
+              <span>Page {page}</span>
+              {hasMore && <Link href={getGalleryHref(page + 1, sort)} prefetch={false} rel="next" className="underline underline-offset-4">Next page</Link>}
+            </nav>
           </section>
+
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <AdsterraNative />
+            <div className="hidden md:block">
+              <AdsterraBanner adKey="5886a3f0b13b2c7376c81f54cbb661a2" width={728} height={90} />
+            </div>
+            <div className="block md:hidden">
+              <AdsterraBanner adKey="57d230052a69423ff827502434658d5f" width={320} height={50} />
+            </div>
+          </div>
         </main>
 
         <aside className="hidden xl:flex flex-col gap-4 pt-14 sticky top-4 self-start shrink-0">
