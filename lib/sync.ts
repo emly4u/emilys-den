@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm"
+import { inArray, sql } from "drizzle-orm"
 import { db } from "./db"
 import { images } from "./db/schema"
 
@@ -113,30 +113,32 @@ export async function syncDriveImages(): Promise<SyncResult> {
 
   if (driveFiles.length === 0) return result
 
-  // Let the database enforce the unique Drive ID constraint instead of
-  // building a large IN query against an existing catalog.
-  for (const file of driveFiles) {
+  // Figure out which files already exist so we never re-import.
+  const driveIds = driveFiles.map((f) => f.id)
+  const existing = await db
+    .select({ driveFileId: images.driveFileId })
+    .from(images)
+    .where(inArray(images.driveFileId, driveIds))
+  const existingIds = new Set(existing.map((e) => e.driveFileId))
+
+  const newFiles = driveFiles.filter((f) => !existingIds.has(f.id))
+  result.skipped = driveFiles.length - newFiles.length
+
+  for (const file of newFiles) {
     try {
       // Keep only Google's resized thumbnail URL in the database. The original
       // file stays in Drive and is opened via driveFileId from the UI.
       const thumbnailUrl = `https://drive.google.com/thumbnail?id=${encodeURIComponent(file.id)}&sz=w1600`
 
-      const inserted = await db
-        .insert(images)
-        .values({
-          driveFileId: file.id,
-          name: file.name,
-          blobUrl: thumbnailUrl,
-          contentType: file.mimeType,
-        })
-        .onConflictDoNothing()
+      await db.insert(images).values({
+        driveFileId: file.id,
+        name: file.name,
+        blobUrl: thumbnailUrl,
+        contentType: file.mimeType,
+      })
 
-      if (inserted.rowCount) {
-        result.imported += 1
-        result.importedNames.push(file.name)
-      } else {
-        result.skipped += 1
-      }
+      result.imported += 1
+      result.importedNames.push(file.name)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       result.errors.push(`${file.name}: ${message}`)
@@ -157,14 +159,6 @@ export async function syncDriveImages(): Promise<SyncResult> {
  */
 export async function maybeSync(): Promise<SyncResult | null> {
   if (!process.env.GCP_API_KEY) return null
-
-  // Existing databases may have the sync_state table without its seed row.
-  // Create that row before claiming the lock so the first sync can run.
-  await db.execute(sql`
-    INSERT INTO sync_state (id, running)
-    VALUES (1, false)
-    ON CONFLICT (id) DO NOTHING
-  `)
 
   // Atomically claim the run: only succeeds if enough time has passed and no
   // other run is currently in progress (or the previous one is stale).
