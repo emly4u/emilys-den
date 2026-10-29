@@ -47,8 +47,40 @@ export async function getImages(
     const hasMore = rows.length > limit
     return { images: hasMore ? rows.slice(0, limit) : rows, hasMore }
   } catch (error) {
-    console.error("[v0] gallery query unavailable:", error instanceof Error ? error.message : String(error))
-    return { images: [], hasMore: false }
+    console.error("[v0] gallery metadata query unavailable:", error instanceof Error ? error.message : String(error))
+
+    // The image catalog should still render when optional engagement tables
+    // have not been connected or migrated yet.
+    try {
+      const rows = await db
+        .select({
+          id: images.id,
+          driveFileId: images.driveFileId,
+          name: images.name,
+          blobUrl: images.blobUrl,
+          contentType: images.contentType,
+          views: images.views,
+          createdAt: images.createdAt,
+        })
+        .from(images)
+        .orderBy(...orderBy)
+        .limit(limit + 1)
+        .offset(offset)
+
+      const hasMore = rows.length > limit
+      return {
+        images: (hasMore ? rows.slice(0, limit) : rows).map((row) => ({
+          ...row,
+          commentCount: 0,
+          likeCount: 0,
+          dislikeCount: 0,
+        })),
+        hasMore,
+      }
+    } catch (fallbackError) {
+      console.error("[v0] image catalog query unavailable:", fallbackError instanceof Error ? fallbackError.message : String(fallbackError))
+      return { images: [], hasMore: false }
+    }
   }
 }
 
