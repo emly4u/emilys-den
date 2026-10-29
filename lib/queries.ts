@@ -23,47 +23,37 @@ export async function getImages(
         : [desc(images.createdAt), desc(images.id)]
 
   // Fetch one extra row to detect whether another page exists.
-  try {
-    const rows = await db
-      .select({
-        id: images.id,
-        driveFileId: images.driveFileId,
-        name: images.name,
-        blobUrl: images.blobUrl,
-        contentType: images.contentType,
-        views: images.views,
-        createdAt: images.createdAt,
-        commentCount: sql<number>`count(${comments.id})::int`,
-        likeCount: sql<number>`(select count(*)::int from ${imageReactions} where ${imageReactions.imageId} = ${images.id} and ${imageReactions.direction} = 'like')`,
-        dislikeCount: sql<number>`(select count(*)::int from ${imageReactions} where ${imageReactions.imageId} = ${images.id} and ${imageReactions.direction} = 'dislike')`,
-      })
-      .from(images)
-      .leftJoin(comments, eq(comments.imageId, images.id))
-      .groupBy(images.id)
-      .orderBy(...orderBy)
-      .limit(limit + 1)
-      .offset(offset)
+  const rows = await db
+    .select({
+      id: images.id,
+      driveFileId: images.driveFileId,
+      name: images.name,
+      blobUrl: images.blobUrl,
+      contentType: images.contentType,
+      views: images.views,
+      createdAt: images.createdAt,
+      commentCount: sql<number>`count(${comments.id})::int`,
+      likeCount: sql<number>`(select count(*)::int from ${imageReactions} where ${imageReactions.imageId} = ${images.id} and ${imageReactions.direction} = 'like')`,
+      dislikeCount: sql<number>`(select count(*)::int from ${imageReactions} where ${imageReactions.imageId} = ${images.id} and ${imageReactions.direction} = 'dislike')`,
+    })
+    .from(images)
+    .leftJoin(comments, eq(comments.imageId, images.id))
+    .groupBy(images.id)
+    .orderBy(...orderBy)
+    .limit(limit + 1)
+    .offset(offset)
 
-    const hasMore = rows.length > limit
-    return { images: hasMore ? rows.slice(0, limit) : rows, hasMore }
-  } catch (error) {
-    console.error("[v0] gallery query unavailable:", error instanceof Error ? error.message : String(error))
-    return { images: [], hasMore: false }
-  }
+  const hasMore = rows.length > limit
+  return { images: hasMore ? rows.slice(0, limit) : rows, hasMore }
 }
 
 export async function getRandomHeroImage(): Promise<{ blobUrl: string | null } | undefined> {
-  try {
-    const rows = await db
-      .select({ blobUrl: images.blobUrl })
-      .from(images)
-      .orderBy(sql`RANDOM()`)
-      .limit(1)
-    return rows[0]
-  } catch (error) {
-    console.error("[v0] hero image query unavailable:", error instanceof Error ? error.message : String(error))
-    return undefined
-  }
+  const rows = await db
+    .select({ blobUrl: images.blobUrl })
+    .from(images)
+    .orderBy(sql`RANDOM()`)
+    .limit(1)
+  return rows[0]
 }
 
 export async function getSitemapImages(): Promise<{ id: number; driveFileId: string; createdAt: Date }[]> {
