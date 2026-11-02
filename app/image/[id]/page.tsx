@@ -11,7 +11,8 @@ import { ImageActions } from "@/components/image-actions"
 import { ImageContextMenu } from "@/components/image-context-menu"
 import { ImageMotionButton, MotionImage } from "@/components/animation-toggle"
 import { WindCanvas } from "@/components/wind-image"
-import { AdsterraBanner } from "@/components/adsterra-banner"
+import { RailAd, RectangleAd, ResponsiveBannerAd } from "@/components/ad-slot"
+import { SponsoredOffer } from "@/components/sponsored-offer"
 import { buttonVariants } from "@/components/ui/button"
 import { incrementView } from "@/app/actions/gallery"
 import { getComments, getImage } from "@/lib/queries"
@@ -106,8 +107,8 @@ export default async function ImagePage({ params }: { params: Promise<{ id: stri
     <div className="min-h-screen">
       <SiteHeader />
       <div className="flex items-start justify-center gap-4 px-2 md:px-4">
-        <aside className="hidden xl:flex flex-col gap-4 pt-10 sticky top-4 self-start shrink-0">
-          <AdsterraBanner adKey="c56cee194a4d1b24830b09af20d13091" width={160} height={600} />
+        <aside className="hidden min-[1700px]:flex flex-col gap-4 pt-10 sticky top-4 self-start shrink-0">
+          <RailAd side="left" />
         </aside>
 
         <main className="min-w-0 flex-1 max-w-5xl px-4 py-6 md:px-6 md:py-10">
@@ -182,23 +183,19 @@ export default async function ImagePage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="flex flex-col gap-6">
-              <AdsterraBanner adKey="a8ed7b64e96d0837a4df314ce4fe16da" width={300} height={250} />
+              <SponsoredOffer placement="image-sidebar" />
+              <RectangleAd />
               <Suspense fallback={<CommentsLoading />}>
                 <CommentsPanel imageId={imageId} />
               </Suspense>
             </div>
           </div>
 
-          <div className="mt-8 hidden md:flex justify-center">
-            <AdsterraBanner adKey="5886a3f0b13b2c7376c81f54cbb661a2" width={728} height={90} />
-          </div>
-          <div className="mt-8 flex justify-center md:hidden">
-            <AdsterraBanner adKey="57d230052a69423ff827502434658d5f" width={320} height={50} />
-          </div>
+          <ResponsiveBannerAd className="mx-auto mt-8 w-full max-w-3xl" />
         </main>
 
-        <aside className="hidden xl:flex flex-col gap-4 pt-10 sticky top-4 self-start shrink-0">
-          <AdsterraBanner adKey="6dc2c7111cf540e9cc06fa69bda599e4" width={160} height={300} />
+        <aside className="hidden min-[1700px]:flex flex-col gap-4 pt-10 sticky top-4 self-start shrink-0">
+          <RailAd side="right" />
         </aside>
       </div>
     </div>

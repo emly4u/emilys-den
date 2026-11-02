@@ -6,8 +6,7 @@ import { revalidatePath } from "next/cache"
 import { SiteHeader } from "@/components/site-header"
 import { GalleryGrid } from "@/components/gallery-grid"
 import { SortToggle } from "@/components/sort-toggle"
-import { AdsterraBanner } from "@/components/adsterra-banner"
-import { AdsterraNative } from "@/components/adsterra-native"
+import { RailAd, ResponsiveBannerAd } from "@/components/ad-slot"
 import { getImages, type ImageSort } from "@/lib/queries"
 import { getGalleryHref, getGalleryPage, getPublicImageUrl, IMAGES_PAGE_SIZE } from "@/lib/images"
 import { maybeSync } from "@/lib/sync"
@@ -48,8 +47,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     <div className="min-h-screen">
       <SiteHeader />
       <div className="flex items-start justify-center gap-4 px-2 md:px-4">
-        <aside className="hidden xl:flex flex-col gap-4 pt-14 sticky top-4 self-start shrink-0">
-          <AdsterraBanner adKey="c56cee194a4d1b24830b09af20d13091" width={160} height={600} />
+        <aside className="hidden min-[1700px]:flex flex-col gap-4 pt-14 sticky top-4 self-start shrink-0">
+          <RailAd side="left" />
         </aside>
 
         <main className="min-w-0 flex-1 max-w-7xl pb-16 pt-8 md:pb-24 md:pt-14">
@@ -83,6 +82,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </div>
           </section>
 
+          {images.length > 0 && <ResponsiveBannerAd className="mx-auto mt-8 w-full max-w-3xl" />}
+
           <section className="mt-12" aria-labelledby="collection-heading">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -112,19 +113,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </nav>
           </section>
 
-          <div className="mt-6 flex flex-col items-center gap-2">
-            <AdsterraNative />
-            <div className="hidden md:block">
-              <AdsterraBanner adKey="5886a3f0b13b2c7376c81f54cbb661a2" width={728} height={90} />
-            </div>
-            <div className="block md:hidden">
-              <AdsterraBanner adKey="57d230052a69423ff827502434658d5f" width={320} height={50} />
-            </div>
-          </div>
         </main>
 
-        <aside className="hidden xl:flex flex-col gap-4 pt-14 sticky top-4 self-start shrink-0">
-          <AdsterraBanner adKey="6dc2c7111cf540e9cc06fa69bda599e4" width={160} height={300} />
+        <aside className="hidden min-[1700px]:flex flex-col gap-4 pt-14 sticky top-4 self-start shrink-0">
+          <RailAd side="right" />
         </aside>
       </div>
     </div>

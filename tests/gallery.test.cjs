@@ -48,6 +48,54 @@ const uiMocks = {
   "@/app/actions/gallery": { loadMoreImages: async () => ({ images: [], hasMore: false }), reactToImage: async () => ({ like: 0, dislike: 0 }) },
 }
 
+test("banner selection fits the container, including narrow mobile and sidebar layouts", () => {
+  const { bannerForWidth } = loadSource("lib/ads.ts")
+  for (const width of [0, 280, 319]) assert.equal(bannerForWidth(width), null)
+  for (const width of [320, 375, 727]) assert.equal(bannerForWidth(width).width, 320)
+  for (const width of [728, 1024, 1920]) assert.equal(bannerForWidth(width).width, 728)
+})
+
+test("long feeds keep every artwork and cap sponsored breaks at three with one native unit", async () => {
+  const fixtures = Array.from({ length: 120 }, (_, index) => ({ ...fixture, id: index + 1 }))
+  const home = loadSource("app/page.tsx", {
+    ...uiMocks,
+    "@/lib/queries": { getImages: async () => ({ images: fixtures, hasMore: false }) },
+  })
+  const html = renderToStaticMarkup(await home.default({ searchParams: Promise.resolve({}) }))
+  assert.equal((html.match(/data-gallery-card=/g) || []).length, 120)
+  assert.equal((html.match(/aria-label="Sponsored offers"/g) || []).length, 3)
+  assert.equal((html.match(/data-ad-slot="native"/g) || []).length, 1)
+  const { hasSponsoredBreak } = loadSource("lib/ads.ts")
+  assert.deepEqual(fixtures.map((_, index) => index).filter(hasSponsoredBreak), [11, 35, 59])
+})
+
+test("production sponsored offers use the verified emly4u link and disclose the destination", () => {
+  const config = loadSource("lib/ads.ts")
+  const { SponsoredOffer } = loadSource("components/sponsored-offer.tsx", {
+    "@/lib/ads": { ...config, ADS_ENABLED: true },
+  })
+  const html = renderToStaticMarkup(SponsoredOfferElement(SponsoredOffer))
+  assert.match(html, /href="https:\/\/auctionr\.org\/4\/c4cabf165469eafd43eb294c8cce3472"/)
+  assert.match(html, /rel="sponsored nofollow noopener noreferrer"/)
+  assert.match(html, /18\+/)
+  assert.match(html, /opens a new tab/)
+})
+
+function SponsoredOfferElement(Component) {
+  return require("react").createElement(Component, { placement: "test" })
+}
+
+test("ad previews do not expose a navigable paid link or load ad scripts", () => {
+  const config = loadSource("lib/ads.ts")
+  const mocks = { "@/lib/ads": { ...config, ADS_ENABLED: false } }
+  const { SponsoredOffer } = loadSource("components/sponsored-offer.tsx", mocks)
+  const { ResponsiveBannerAd } = loadSource("components/ad-slot.tsx", mocks)
+  const html = renderToStaticMarkup(require("react").createElement("div", null,
+    SponsoredOfferElement(SponsoredOffer), require("react").createElement(ResponsiveBannerAd)))
+  assert.doesNotMatch(html, /href=|<iframe|<script/)
+  assert.match(html, /Preview only/)
+})
+
 test("homepage emits actual image elements and detail links without JavaScript, even with no blob URL", async () => {
   const home = loadSource("app/page.tsx", {
     ...uiMocks,
