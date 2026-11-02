@@ -46,9 +46,9 @@ export function SyncButton() {
           {message}
         </span>
       )}
-      <Button onClick={handleSync} disabled={isPending} variant="secondary" size="sm" aria-label={isPending ? "Syncing images" : "Sync now"} className="min-h-11 min-w-11">
+      <Button onClick={handleSync} disabled={isPending} variant="secondary" size="sm">
         <RefreshCw className={`size-4 ${isPending ? "animate-spin" : ""}`} aria-hidden="true" />
-        <span className="hidden sm:inline">{isPending ? "Syncing" : "Sync now"}</span>
+        {isPending ? "Syncing" : "Sync now"}
       </Button>
     </div>
   )
